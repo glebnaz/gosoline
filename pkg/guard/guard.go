@@ -31,19 +31,16 @@ type LadonGuard struct {
 }
 
 func NewGuard(config cfg.Config, logger log.Logger) (*LadonGuard, error) {
-	sqlManager, err := NewSqlManager(config, logger)
+	warden, err := NewWarden(config, logger,
+		WithBaseAuditLog(config, logger),
+		WithBaseSqlManager(config, logger))
 	if err != nil {
-		return nil, fmt.Errorf("can not create sqlManager: %w", err)
+		return nil, fmt.Errorf("error create new guard: %w", err)
 	}
-
-	return NewGuardWithInterfaces(sqlManager), nil
+	return NewGuardWithInterfaces(warden), nil
 }
 
-func NewGuardWithInterfaces(manager Manager) *LadonGuard {
-	warden := &ladon.Ladon{
-		Manager: manager,
-	}
-
+func NewGuardWithInterfaces(warden *ladon.Ladon) *LadonGuard {
 	return &LadonGuard{
 		warden: warden,
 	}
